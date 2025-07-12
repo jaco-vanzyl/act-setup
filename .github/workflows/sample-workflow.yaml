@@ -1,9 +1,6 @@
 # Sample GitHub Actions workflow to test Kubernetes connectivity
 name: Sample Kubernetes Workflow
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 jobs:
   test-kubernetes:
