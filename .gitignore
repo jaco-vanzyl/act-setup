@@ -1,0 +1,2 @@
+# .secrets file contains sensitive kubeconfig data.
+.secrets

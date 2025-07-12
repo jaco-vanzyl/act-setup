@@ -1,16 +1,39 @@
----
-name: Sample Workflow
+# Sample GitHub Actions workflow to test Kubernetes connectivity
+name: Sample Kubernetes Workflow
 on:
   push:
     branches:
       - main
   workflow_dispatch:
 jobs:
-  test:
+  test-kubernetes:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Print environment
+      - name: Install kubectl
         run: |
-          echo "Running on $RUNNER_OS"
+          curl -LO "https://dl.k8s.io/release/v1.33.2/bin/linux/arm64/kubectl"
+          chmod +x kubectl
+          mv kubectl /usr/local/bin/
+          kubectl version --client
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "$KUBE_CONFIG" | base64 -d > $HOME/.kube/config
+          # Debug: Verify kubeconfig content
+          echo "Contents of kubeconfig (first 10 lines):"
+          head -n 10 $HOME/.kube/config
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+      - name: Validate kubeconfig
+        run: |
+          # Test kubeconfig validity
+          kubectl --kubeconfig $HOME/.kube/config version --client=false
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+      - name: Test Kubernetes connection
+        run: |
+          kubectl get nodes
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
